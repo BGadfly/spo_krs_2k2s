@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c804659a-47a2-4705-a17d-51da3b7c2ffc" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/курсовая.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/treker_base.db" beforeDir="false" afterPath="$PROJECT_DIR$/treker_base.db" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,6 +44,7 @@
     "Python.1.executor": "Run",
     "Python.ConfigScreen_Test.executor": "Run",
     "Python.Main.executor": "Run",
+    "Python.Main2.executor": "Run",
     "Python.config pattern.executor": "Run",
     "Python.fffffffffffffff.executor": "Run",
     "Python.login.executor": "Run",
@@ -60,11 +59,12 @@
     "Python.тупой файл.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/Maris/OneDrive/Рабочий стол/вуз/спо/курсовая/тест"
+    "last_opened_file_path": "C:/Users/Maris/OneDrive/Рабочий стол/вуз/спо/курсовая"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Maris\OneDrive\Рабочий стол\вуз\спо\курсовая" />
       <recent name="C:\Users\Maris\OneDrive\Рабочий стол\вуз\спо\курсовая\тест" />
     </key>
     <key name="MoveFile.RECENT_KEYS">

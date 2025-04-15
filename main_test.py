@@ -147,7 +147,7 @@ class CreateTrekerScreen(Screen):
 
         c.execute(f"""
         CREATE TABLE IF NOT EXISTS {treker_colnname_list} (
-        numrow INTEGER,
+        numcoln INTEGER,
         namecoln TEXT
         )
         """)
@@ -188,57 +188,113 @@ class InTrekerScreen(Screen):
     def update_screen(self):
         self.clear_widgets()
 
-        bl = BoxLayout(orientation='vertical', padding=100)
-        self.add_widget(bl)
+        sv = ScrollView()
+        root_layout = GridLayout(cols=1, size_hint_y=None, spacing=10)  # Добавить промежуток для лучшей эстетики
+        root_layout.bind(minimum_height=root_layout.setter('height'))
+        sv.add_widget(root_layout)
+        self.add_widget(sv)
 
-        gltxt = GridLayout(rows=3, cols=1, spacing=0)
-
-        c.execute("SELECT * FROM treker_basic WHERE name = ?", (self.treker_name,))
-        basic_info = c.fetchone()
+        try:
+            c.execute("SELECT * FROM treker_basic WHERE name = ?", (self.treker_name,))
+            basic_info = c.fetchone()
+        except Exception as e:
+            print(f"Ошибка при получении базовой информации: {e}")
+            return
 
         if basic_info:
-            tr_cell_tab_name = 'сells' + (str(self.treker_name)).replace(" ", "_")
+            self.tr_cell_tab_name = 'сells' + (str(self.treker_name)).replace(" ", "_")
+            self.treker_colnname_list = 'colnname' + (str(self.treker_name)).replace(" ", "_")
+            self.treker_rowname_list = 'rowname' + (str(self.treker_name)).replace(" ", "_")
 
             tr_desk = basic_info[1]
             q_row = basic_info[2]
-            q_colm = basic_info[3]
+            q_coln = basic_info[3]
 
-            go_to_main_button = Button(text="Вернуться в меню")
-            go_to_main_button.bind(on_release=lambda x: setattr(self.manager, 'current', 'main_scr'))
-            gltxt.add_widget(go_to_main_button)
+            root_layout.add_widget(Button(text="Вернуться в меню", on_release=lambda x: setattr(self.manager, 'current', 'main_scr'),size_hint=(None, None), size=(100, 40)))
+            root_layout.add_widget(Button(text="Настроить трекер", on_release=lambda x: self.set_and_go(self.treker_name), size_hint=(None, None), size=(100, 40)))
+            root_layout.add_widget(Label(text=self.treker_name, halign='left', valign='top'))
+            root_layout.add_widget(Label(text=tr_desk, halign='left', valign='top'))
 
-            gltxt.add_widget(Label(text=self.treker_name, halign='left', valign='top'))
+            # названия столбцов
+            gl_colnname = GridLayout(rows=1, cols=q_coln, size_hint_y=None, height=40, size_hint_x=None)
+            gl_colnname.bind(minimum_height=gl_colnname.setter('height'))
+            gl_colnname.size_hint_x = None
+            gl_colnname.width = Window.width - 150
 
-            description_label = Label(text=tr_desk, size_hint=(1, None), height=100, text_size=(600, None),
-                                      halign='left', valign='top')
-            gltxt.add_widget(description_label)
+            col_name_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=40)
+            col_name_layout.add_widget(Widget(size_hint_x=None, width=150))
+            col_name_layout.add_widget(gl_colnname)
 
-            gl = GridLayout(rows=q_row, cols=q_colm, spacing=0)
+            try:
+                c.execute(f"SELECT * FROM {self.treker_colnname_list}")
+                colnname_info = c.fetchall()
+            except Exception as e:
+                print(f"Ошибка при получении названий столбцов: {e}")
+                return
 
-            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (tr_cell_tab_name,))
-            if c.fetchone() is None:
-                print(f"Таблица {tr_cell_tab_name} не найдена")
-            else:
-                c.execute(f"SELECT * FROM {tr_cell_tab_name}")
+            for a_1 in range(q_coln):
+                if a_1 < len(colnname_info):
+                    text = str(colnname_info[a_1][1])
+                else:
+                    text = ""
 
-            c.execute(f"SELECT * FROM {tr_cell_tab_name}")
-            cell_info = c.fetchall()
+                self.colnname_inp = Label(text=text, size_hint_y=None, height=40, size_hint_x=None, width=40)
+                gl_colnname.add_widget(self.colnname_inp)
+
+            root_layout.add_widget(col_name_layout)
+
+            # интерактив + названия строк
+            table_and_row_names_layout = GridLayout(cols=2, size_hint_y=None)
+            table_and_row_names_layout.bind(minimum_height=table_and_row_names_layout.setter('height'))
+
+            gl_rowname = GridLayout(rows=q_row, cols=1, size_hint_y=None, width=150)
+            gl_rowname.bind(minimum_height=gl_rowname.setter('height'))
+            gl_rowname.size_hint_x = None
+
+            try:
+                c.execute(f"SELECT * FROM {self.treker_rowname_list}")
+                rowname_info = c.fetchall()
+            except Exception as e:
+                print(f"Ошибка при получении названий строк: {e}")
+                return
+
+            for a_2 in range(q_row):
+                if a_2 < len(rowname_info):
+                    text = str(rowname_info[a_2][1])
+                else:
+                    text = ""
+
+                self.rowname_inp = Label(text=text, size_hint_y=None, height=40, size_hint_x=None, width=150)
+                gl_rowname.add_widget(self.rowname_inp)
+
+            table_and_row_names_layout.add_widget(gl_rowname)
+
+            gl_table = GridLayout(rows=q_row, cols=q_coln, size_hint_y=None)
+            gl_table.bind(minimum_height=gl_table.setter('height'))
+
+            try:
+                c.execute(f"SELECT * FROM {self.tr_cell_tab_name}")
+                cell_info = c.fetchall()
+            except Exception as e:
+                print(f"Ошибка при получении информации о ячейках: {e}")
+                return
 
             for a_55 in range(len(cell_info)):
                 if cell_info[a_55][1] == 'empty':
-                    gl.add_widget(Widget())
+                    gl_table.add_widget(Widget())
                 elif cell_info[a_55][1] == 'white':
-                    btn = Button(background_color=[1, 1, 1, 1])
+                    btn = Button(background_color=[1, 1, 1, 1], size_hint=(None,None), size=(40, 40))
                     btn.bind(on_release=lambda x, ind=a_55, btn_ref=btn: self.if_release(ind, btn_ref))
-                    gl.add_widget(btn)
+                    gl_table.add_widget(btn)
                 else:
-                    btn = Button(background_color=[1, 0, 0, 1])
+                    btn = Button(background_color=[1, 0, 0, 1], size_hint=(None,None), size=(40, 40))
                     btn.bind(on_release=lambda x, ind=a_55, btn_ref=btn: self.if_release(ind, btn_ref))
-                    gl.add_widget(btn)
+                    gl_table.add_widget(btn)
 
-            bl.add_widget(gltxt)
-            bl.add_widget(gl)
-            bl.add_widget(Button(text="Настроить трекер",  on_release=lambda x: self.set_and_go(self.treker_name)))
+            table_and_row_names_layout.add_widget(gl_table)
+
+            root_layout.add_widget(table_and_row_names_layout)
+
 
     def set_and_go(self, text):
         self.manager.data_manager.set_treker_name(text)  # Используем data_manager для установки имени трекера
@@ -261,10 +317,6 @@ class InTrekerScreen(Screen):
 class ConfigTrekerScreen(Screen):
     def __init__(self, **kwargs):
         super(ConfigTrekerScreen, self).__init__(**kwargs)
-        self.treker_name = ''
-        self.tr_cell_tab_name = ''
-        self.treker_colnname_list = ''
-        self.treker_rowname_list = ''
 
     def on_pre_enter(self):
 
@@ -380,7 +432,7 @@ class ConfigTrekerScreen(Screen):
                         btn = Button(background_color=[0, 0, 0, 1], size_hint=(None,None), size=(40, 40)) #Правильный размер ячейки
                     else:
                         btn = Button(background_color=[1, 1, 1, 1], size_hint=(None,None), size=(40, 40)) #Правильный размер ячейки
-                else:  #Если данные в БД отсутствуют, создаем кнопку по умолчанию "empty"
+                else:
                     btn = Button(background_color=[0, 0, 0, 1], size_hint=(None,None), size=(40, 40)) # по умолчанию черный
 
                 btn.bind(on_release=lambda x, ind=a_55, btn_ref=btn: self.if_release(ind, btn_ref))
@@ -390,24 +442,35 @@ class ConfigTrekerScreen(Screen):
 
             root_layout.add_widget(table_and_row_names_layout)
 
+            root_layout.add_widget(Button(text="Сохранить изменения", on_press=self.config_complit, size_hint=(None,None), size=(100, 40)))
+            root_layout.add_widget(Button(text="Вернуться в меню", on_release=lambda x: setattr(self.manager, 'current', 'main_scr'), size_hint=(None, None), size=(100, 40)))
+
+            #root_layout.add_widget(Button(text="Назад", on_release = lambda x, n=name: self.set_and_go(n)))
+
     def if_release(self, cell_ind, btn):
         if btn.background_color == [0, 0, 0, 1]:
             btn.background_color = [1, 1, 1, 1]
             self.del_list.remove(cell_ind)
-        if btn.background_color == [1, 1, 1, 1]:
+        elif btn.background_color == [1, 1, 1, 1]:
             btn.background_color = [0, 0, 0, 1]
             self.del_list.append(cell_ind)
 
     #сохраниение
-    def config_complit():
-        for b_1 in self.del_list: #сохр состояния ячеек
-            c.execute(f"UPDATE {self.treker_cells_list} SET color = ? WHERE ind = ?", ('empty', b_1))
+    def config_complit(self, instance):
+        print(self.del_list)
+        print(self.input_row_list)
+        print(self.input_coln_list)
+        if self.del_list != []:
+            for b_1 in self.del_list: #сохр состояния ячеек
+                c.execute(f"UPDATE {self.tr_cell_tab_name} SET color = ? WHERE ind = ?", ('empty', b_1))
 
-        for b_3 in self.input_row_list:
-            c.execute(f"UPDATE {self.treker_colnname_list} SET color = ? WHERE ind = ?", ('empty', b_3))
+        if self.input_row_list != []:
+            for b_3 in self.input_row_list:
+                c.execute(f"UPDATE {self.treker_colnname_list} SET namerow = ? WHERE numrow = ?", ('изм', b_3))
 
-        for b_4 in self.input_coln_list:
-            c.execute(f"UPDATE {self.treker_rowname_list} SET color = ? WHERE ind = ?", ('empty', b_3))
+        if self.input_coln_list != []:
+            for b_4 in self.input_coln_list:
+                c.execute(f"UPDATE {self.treker_rowname_list} SET namecoln = ? WHERE numcoln = ?", ('изм', b_3))
 
 
 class MyApp(App):
